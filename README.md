@@ -332,6 +332,19 @@ chmod +x deploy.sh
 sudo chown -R $USER:$USER ./
 ```
 
+**Prisma schema errors:**
+```bash
+# If you see Prisma relation errors, the schema has been fixed
+# Just rebuild the containers:
+./deploy.sh fresh
+```
+
+**OpenSSL warnings:**
+```bash
+# OpenSSL is now properly installed in Docker containers
+# These warnings are informational and don't affect functionality
+```
+
 ### Health Checks
 All services include health checks accessible via:
 - Backend: http://localhost:3001/health

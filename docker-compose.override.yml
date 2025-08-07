@@ -11,6 +11,11 @@ services:
       POSTGRES_DB: ufobeep_dev
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ufobeep_dev"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   redis:
     # Use same Redis configuration as production
@@ -26,6 +31,9 @@ services:
       - JWT_SECRET=dev_jwt_secret_not_for_production
       - ADMIN_EMAIL=admin@ufobeep.dev
       - ADMIN_PASSWORD=admin123
+      - POSTGRES_DB=ufobeep_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
     volumes:
       - .:/app
       - /app/node_modules

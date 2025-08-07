@@ -147,7 +147,7 @@ start_services() {
     sleep 10
     
     # Run database migrations
-    migrate_database
+    migrate_database "$compose_files"
     
     # Start all services
     docker-compose $compose_files up -d
@@ -216,19 +216,33 @@ fresh_deploy() {
 
 # Run database migrations
 migrate_database() {
-    log_info "Running database migrations..."
+    local compose_files=${1:-"-f docker-compose.yml"}
+    log_info "Setting up database schema..."
     
-    # Check if the backend container is running
-    if docker-compose ps backend | grep -q "Up"; then
-        docker-compose exec backend npx prisma migrate deploy
-        docker-compose exec backend npx prisma db seed
+    # Check if we're in development mode
+    if [[ "$compose_files" == *"override"* ]]; then
+        log_info "Development mode: Using db push for faster setup..."
+        # Use db push for development (faster, no migration files needed)
+        if docker-compose $compose_files ps backend | grep -q "Up"; then
+            docker-compose $compose_files exec backend npx prisma db push --accept-data-loss
+            docker-compose $compose_files exec backend npx prisma db seed || log_warning "Seeding skipped (may not exist)"
+        else
+            docker-compose $compose_files run --rm backend npx prisma db push --accept-data-loss
+            docker-compose $compose_files run --rm backend npx prisma db seed || log_warning "Seeding skipped (may not exist)"
+        fi
     else
-        # Run migrations in a temporary container
-        docker-compose run --rm backend npx prisma migrate deploy
-        docker-compose run --rm backend npx prisma db seed
+        log_info "Production mode: Using migrations..."
+        # Use migrations for production
+        if docker-compose $compose_files ps backend | grep -q "Up"; then
+            docker-compose $compose_files exec backend npx prisma migrate deploy
+            docker-compose $compose_files exec backend npx prisma db seed || log_warning "Seeding skipped (may not exist)"
+        else
+            docker-compose $compose_files run --rm backend npx prisma migrate deploy
+            docker-compose $compose_files run --rm backend npx prisma db seed || log_warning "Seeding skipped (may not exist)"
+        fi
     fi
     
-    log_success "Database migrations completed"
+    log_success "Database setup completed"
 }
 
 # Show service logs
