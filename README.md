@@ -174,6 +174,13 @@ The `deploy.sh` script provides comprehensive deployment management:
 ## 🌐 Production Deployment
 
 ### Environment Variables
+Copy `.env.example` to `.env` and update with your configuration:
+
+```bash
+cp .env.example .env
+# Edit .env with your actual values
+```
+
 Ensure these are properly configured in production:
 
 ```env
@@ -181,6 +188,7 @@ NODE_ENV=production
 DATABASE_URL=postgresql://user:pass@host:5432/dbname
 JWT_SECRET=your-production-jwt-secret
 ADMIN_PASSWORD=secure-admin-password
+POSTGRES_PASSWORD=secure-database-password
 ```
 
 ### SSL/HTTPS Setup

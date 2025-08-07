@@ -1,0 +1,43 @@
+# Docker Compose Override for Development
+# This file is used for local development and testing
+# It overrides settings from docker-compose.yml for dev-friendly configuration
+# To use: docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+
+version: '3.8'
+
+services:
+  postgres:
+    environment:
+      POSTGRES_DB: ufobeep_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+
+  redis:
+    # Use same Redis configuration as production
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Uses the development Dockerfile
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/ufobeep_dev
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=dev_jwt_secret_not_for_production
+      - ADMIN_EMAIL=admin@ufobeep.dev
+      - ADMIN_PASSWORD=admin123
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:3001
+        - VITE_SOCKET_URL=http://localhost:3001
+    environment:
+      - NODE_ENV=development

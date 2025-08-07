@@ -106,12 +106,22 @@ build_app() {
     
     # Build backend
     log_info "Installing backend dependencies..."
-    npm install
+    if [[ -f "package-lock.json" ]]; then
+        npm ci
+    else
+        npm install
+        log_warning "Generated package-lock.json for faster future builds"
+    fi
     
     # Build frontend
     log_info "Building frontend..."
     cd "$FRONTEND_DIR"
-    npm install
+    if [[ -f "package-lock.json" ]]; then
+        npm ci
+    else
+        npm install
+        log_warning "Generated package-lock.json for faster future builds"
+    fi
     npm run build
     cd ..
     
@@ -163,6 +173,8 @@ start_dev() {
 # Stop the services
 stop_services() {
     log_info "Stopping UFOBeep services..."
+    # Stop both production and development services
+    docker-compose -f docker-compose.yml -f docker-compose.override.yml down 2>/dev/null || true
     docker-compose down
     log_success "All services stopped"
 }

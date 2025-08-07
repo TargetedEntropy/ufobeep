@@ -56,8 +56,11 @@ Thumbs.db
 tmp/
 temp/
 
-# Docker
-docker-compose.override.yml
+# Backup files
+backups/
+*.backup
+*.bak
 
-# Prisma
-prisma/migrations/
+# Keep these important files
+!package-lock.json
+!*/package-lock.json
