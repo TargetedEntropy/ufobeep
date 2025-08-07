@@ -7,6 +7,8 @@ WORKDIR /app
 # Install system dependencies
 RUN apk add --no-cache \
     curl \
+    openssl \
+    openssl-dev \
     postgresql-client
 
 # Copy package files

@@ -3,7 +3,10 @@
 FROM node:18-alpine
 
 # Install system dependencies
-RUN apk add --no-cache curl
+RUN apk add --no-cache \
+    curl \
+    openssl \
+    openssl-dev
 
 # Set working directory
 WORKDIR /app

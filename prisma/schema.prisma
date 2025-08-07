@@ -36,6 +36,7 @@ model User {
   sightings     Sighting[]
   chatMessages  ChatMessage[]
   adminActions  AdminAction[]
+  targetedByActions AdminAction[] @relation("AdminTargetUser")
   
   @@map("users")
 }
@@ -114,7 +115,7 @@ model ChatMessage {
 
 model AdminAction {
   id          String   @id @default(cuid())
-  action      String   // 'hide_sighting', 'verify_sighting', 'ban_user', etc.
+  actionType  String   // 'hide_sighting', 'verify_sighting', 'ban_user', etc.
   reason      String?
   details     String?
   
