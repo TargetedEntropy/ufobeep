@@ -1,24 +1,33 @@
+# Development Dockerfile for UFOBeep Backend
+# This is used for development with hot reloading
 FROM node:18-alpine
 
+# Install system dependencies
+RUN apk add --no-cache curl
+
+# Set working directory
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY prisma ./prisma/
 
-# Install dependencies
-RUN npm ci --only=production
+# Install ALL dependencies (including dev dependencies)
+RUN npm ci
 
-# Copy source code
-COPY . .
+# Generate Prisma client
+RUN npx prisma generate
 
-# Build the application
-RUN npm run build
+# Create necessary directories
+RUN mkdir -p uploads logs
 
-# Create uploads directory
-RUN mkdir -p uploads
-
-# Expose port
+# Expose ports
 EXPOSE 3001
+EXPOSE 9229
 
-# Start the application
-CMD ["npm", "start"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:3001/health || exit 1
+
+# Start in development mode with hot reloading
+CMD ["npm", "run", "dev"]

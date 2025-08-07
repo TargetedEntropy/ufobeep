@@ -106,36 +106,26 @@ chmod +x deploy.sh
 The `deploy.sh` script provides comprehensive deployment management:
 
 ```bash
-# Start all services
-./deploy.sh start
+# Production Deployment
+./deploy.sh start          # Start all services in production mode
+./deploy.sh status         # Check service status
+./deploy.sh health         # Comprehensive health check
 
-# Stop all services  
-./deploy.sh stop
+# Development Mode
+./deploy.sh dev            # Start in development mode with hot reloading
 
-# Restart all services
-./deploy.sh restart
+# Management
+./deploy.sh stop           # Stop all services
+./deploy.sh restart        # Restart all services
+./deploy.sh fresh          # Fresh deployment (removes data)
 
-# Fresh deployment (removes all data - use with caution!)
-./deploy.sh fresh
-
-# Build the application
-./deploy.sh build
-
-# Run database migrations
-./deploy.sh migrate
-
-# View service logs
-./deploy.sh logs
-./deploy.sh logs backend  # View specific service logs
-
-# Check service status
-./deploy.sh status
-
-# Create database backup
-./deploy.sh backup
-
-# Show help
-./deploy.sh help
+# Maintenance
+./deploy.sh logs           # View logs
+./deploy.sh logs backend   # View specific service logs
+./deploy.sh backup         # Create database backup
+./deploy.sh migrate        # Run database migrations
+./deploy.sh build          # Build application
+./deploy.sh help           # Show help
 ```
 
 ## 🏗 Architecture Overview

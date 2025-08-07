@@ -120,10 +120,18 @@ build_app() {
 
 # Start the services
 start_services() {
-    log_info "Starting UFOBeep services..."
+    local dev_mode=${1:-false}
+    local compose_files="-f docker-compose.yml"
+    
+    if [[ "$dev_mode" == "true" ]]; then
+        log_info "Starting UFOBeep services in development mode..."
+        compose_files="-f docker-compose.yml -f docker-compose.override.yml"
+    else
+        log_info "Starting UFOBeep services in production mode..."
+    fi
     
     # Start database and cache services first
-    docker-compose up -d postgres redis
+    docker-compose $compose_files up -d postgres redis
     
     log_info "Waiting for database to be ready..."
     sleep 10
@@ -132,10 +140,24 @@ start_services() {
     migrate_database
     
     # Start all services
-    docker-compose up -d
+    docker-compose $compose_files up -d
     
-    log_success "All services started successfully"
+    if [[ "$dev_mode" == "true" ]]; then
+        log_success "All services started in development mode"
+        log_info "Development features enabled:"
+        log_info "  - Hot reloading for backend and frontend"
+        log_info "  - Debug port 9229 exposed for Node.js debugging"
+        log_info "  - Volume mounts for live code updates"
+    else
+        log_success "All services started in production mode"
+    fi
+    
     show_status
+}
+
+# Start development services
+start_dev() {
+    start_services true
 }
 
 # Stop the services
@@ -270,10 +292,12 @@ show_help() {
     echo "  status    - Show service status"
     echo "  backup    - Create database backup"
     echo "  health    - Run comprehensive health check"
+    echo "  dev       - Start in development mode with hot reloading"
     echo "  help      - Show this help message"
     echo
     echo "Examples:"
     echo "  ./deploy.sh start"
+    echo "  ./deploy.sh dev"
     echo "  ./deploy.sh logs backend"
     echo "  ./deploy.sh fresh"
     echo
@@ -330,6 +354,11 @@ main() {
                 log_error "Health check script not found"
                 exit 1
             fi
+            ;;
+        "dev")
+            check_dependencies
+            setup_env
+            start_dev
             ;;
         "help"|*)
             show_help
