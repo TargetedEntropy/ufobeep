@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  username    String?  @unique
+  email       String?  @unique
+  password    String?
+  isAnonymous Boolean  @default(true)
+  isAdmin     Boolean  @default(false)
+  
+  // Location tracking for notifications
+  lastLatitude  Float?
+  lastLongitude Float?
+  lastLocationUpdate DateTime?
+  
+  // Notification preferences
+  notificationRadius Float @default(50.0) // kilometers
+  enableNotifications Boolean @default(true)
+  
+  // Analytics
+  ipAddress     String?
+  userAgent     String?
+  sessionCount  Int @default(1)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  sightings     Sighting[]
+  chatMessages  ChatMessage[]
+  adminActions  AdminAction[]
+  
+  @@map("users")
+}
+
+model Sighting {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  
+  // Geospatial data
+  latitude    Float
+  longitude   Float
+  location    String? // Human-readable location description
+  
+  // Sighting details
+  sightingDate DateTime
+  duration     Int?     // Duration in seconds
+  witnesses    Int      @default(1)
+  weather      String?
+  visibility   String?
+  
+  // Media
+  imageUrls    String[] @default([])
+  videoUrls    String[] @default([])
+  
+  // Moderation
+  isVerified   Boolean  @default(false)
+  isHidden     Boolean  @default(false)
+  moderatedBy  String?
+  moderationNote String?
+  
+  // Analytics
+  viewCount    Int      @default(0)
+  reportCount  Int      @default(0)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  userId       String?
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  chatMessages ChatMessage[]
+  adminActions AdminAction[]
+  
+  @@map("sightings")
+  @@index([latitude, longitude], name: "sighting_location_idx")
+  @@index([createdAt], name: "sighting_created_idx")
+  @@index([isHidden, isVerified], name: "sighting_moderation_idx")
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  message   String
+  
+  // Relations
+  sightingId String
+  sighting   Sighting @relation(fields: [sightingId], references: [id], onDelete: Cascade)
+  
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Anonymous user info
+  anonymousName String?
+  ipAddress     String?
+  
+  // Moderation
+  isHidden      Boolean @default(false)
+  moderatedBy   String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("chat_messages")
+  @@index([sightingId, createdAt], name: "chat_sighting_time_idx")
+}
+
+model AdminAction {
+  id          String   @id @default(cuid())
+  action      String   // 'hide_sighting', 'verify_sighting', 'ban_user', etc.
+  reason      String?
+  details     String?
+  
+  // Target entities
+  targetUserId     String?
+  targetSightingId String?
+  
+  // Relations
+  adminId     String
+  admin       User     @relation(fields: [adminId], references: [id])
+  targetUser  User?    @relation("AdminTargetUser", fields: [targetUserId], references: [id])
+  targetSighting Sighting? @relation(fields: [targetSightingId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  
+  @@map("admin_actions")
+  @@index([createdAt], name: "admin_action_time_idx")
+}
+
+model UserSession {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  @@map("user_sessions")
+  @@index([token], name: "session_token_idx")
+  @@index([userId], name: "session_user_idx")
+}
+
+// For tracking anonymous submissions and spam prevention
+model SubmissionLog {
+  id        String   @id @default(cuid())
+  ipAddress String
+  userAgent String?
+  action    String   // 'sighting_submit', 'chat_message', etc.
+  
+  // Rate limiting data
+  count     Int      @default(1)
+  windowStart DateTime @default(now())
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("submission_logs")
+  @@unique([ipAddress, action, windowStart], name: "rate_limit_key")
+  @@index([ipAddress, createdAt], name: "ip_time_idx")
+}
