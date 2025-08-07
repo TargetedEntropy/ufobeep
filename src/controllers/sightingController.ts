@@ -419,7 +419,7 @@ export const reportSighting = async (req: Request, res: Response) => {
     // Create admin action for review
     await prisma.adminAction.create({
       data: {
-        action: 'sighting_reported',
+        actionType: 'sighting_reported',
         reason,
         targetSightingId: id,
         adminId: req.user.id, // Will be reviewed by actual admin later

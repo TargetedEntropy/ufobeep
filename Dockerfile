@@ -32,5 +32,5 @@ EXPOSE 9229
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:3001/health || exit 1
 
-# Start in development mode with hot reloading
-CMD ["npm", "run", "dev"]
+# Start backend only in development mode with hot reloading
+CMD ["npm", "run", "dev:backend"]

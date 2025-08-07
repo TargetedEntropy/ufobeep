@@ -306,43 +306,39 @@ socket.on('nearby-sighting', (sighting: Sighting) => void)
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+For detailed troubleshooting information, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 
-**Port already in use:**
+### Quick Fixes
+
+**Database authentication errors:**
 ```bash
+# Clean restart with consistent credentials
 ./deploy.sh stop
-./deploy.sh start
-```
-
-**Database connection issues:**
-```bash
-./deploy.sh logs postgres
-./deploy.sh restart
-```
-
-**Frontend build errors:**
-```bash
-./deploy.sh build
-./deploy.sh logs frontend
-```
-
-**Permission denied errors:**
-```bash
-chmod +x deploy.sh
-sudo chown -R $USER:$USER ./
-```
-
-**Prisma schema errors:**
-```bash
-# If you see Prisma relation errors, the schema has been fixed
-# Just rebuild the containers:
 ./deploy.sh fresh
 ```
 
-**OpenSSL warnings:**
+**Build failures:**
 ```bash
-# OpenSSL is now properly installed in Docker containers
-# These warnings are informational and don't affect functionality
+# Rebuild from scratch
+./deploy.sh stop
+docker-compose build --no-cache
+./deploy.sh start
+```
+
+**Service not responding:**
+```bash
+# Check service health
+./deploy.sh health
+./deploy.sh logs [service-name]
+```
+
+### Complete Reset
+If issues persist:
+```bash
+# Nuclear option - removes all data
+./deploy.sh stop
+docker system prune -a -f --volumes
+./deploy.sh fresh
 ```
 
 ### Health Checks

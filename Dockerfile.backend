@@ -24,8 +24,8 @@ RUN npx prisma generate
 # Copy application code
 COPY . .
 
-# Build TypeScript
-RUN npm run build
+# Build backend TypeScript only
+RUN npm run build:backend
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \

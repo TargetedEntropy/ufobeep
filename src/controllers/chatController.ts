@@ -233,7 +233,7 @@ export const hideMessage = async (req: Request, res: Response) => {
     // Create admin action log
     await prisma.adminAction.create({
       data: {
-        action: 'hide_message',
+        actionType: 'hide_message',
         reason: reason || 'Inappropriate content',
         adminId: req.user.id,
         details: `Hidden message ${messageId} in sighting ${message.sightingId}`,

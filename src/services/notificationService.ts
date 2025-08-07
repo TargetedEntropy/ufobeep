@@ -109,8 +109,10 @@ export class NotificationService {
       const participantMessages = await prisma.chatMessage.findMany({
         where: {
           sightingId: chatMessage.sightingId,
-          userId: { not: null },
-          userId: { not: excludeUserId },
+          userId: { 
+            not: excludeUserId,
+            isSet: true 
+          },
         },
         select: {
           userId: true,

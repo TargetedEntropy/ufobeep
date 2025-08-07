@@ -31,7 +31,10 @@ export const generateToken = async (user: AuthUser, sessionId?: string): Promise
     sessionId,
   };
 
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(payload, JWT_SECRET, { 
+    expiresIn: JWT_EXPIRES_IN,
+    algorithm: 'HS256'
+  });
 };
 
 // Verify JWT token
@@ -146,7 +149,11 @@ export const getUserFromToken = async (token: string): Promise<AuthUser | null> 
       },
     });
 
-    return user;
+    return user ? {
+      ...user,
+      username: user.username || undefined,
+      email: user.email || undefined,
+    } : null;
   } catch (error) {
     logger.warn('Invalid token in getUserFromToken:', error);
     return null;

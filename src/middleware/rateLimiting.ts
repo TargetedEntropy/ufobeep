@@ -125,7 +125,7 @@ export const spamDetection = async (req: Request, res: Response, next: any) => {
     // Log submission
     await prisma.submissionLog.upsert({
       where: {
-        ipAddress_action_windowStart: {
+        rate_limit_key: {
           ipAddress,
           action: req.route?.path || req.path,
           windowStart: new Date(Math.floor(Date.now() / (60 * 60 * 1000)) * (60 * 60 * 1000)),

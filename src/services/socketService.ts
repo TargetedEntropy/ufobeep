@@ -1,4 +1,4 @@
-import { Server as SocketIOServer } from 'socket.io';
+import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server } from 'http';
 import prisma, { geoUtils } from '../utils/database';
 import { socketAuth } from '../middleware/auth';
